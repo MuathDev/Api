@@ -1,4 +1,5 @@
 
+using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace e_comm
+namespace Api
 {
     public class Startup
     {
@@ -32,7 +33,10 @@ namespace e_comm
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddScoped<ICertificateRepository, CertificateRepository>();
+
             services.AddControllers();
+
             services.AddDbContext<StoreContext>(x => x.UseSqlServer
             (_config.GetConnectionString("DefaultConnection")));
 
