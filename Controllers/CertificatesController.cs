@@ -1,8 +1,12 @@
 ﻿
+using AutoMapper;
+using certs.Dtos;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specifications;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Api.Controllers
@@ -13,27 +17,49 @@ namespace Api.Controllers
     public class CertificatesController : ControllerBase
     {
 
-        private readonly ICertificateRepository _repo;
-        public CertificatesController(ICertificateRepository repo)
+        private readonly IGenericRepository<Certificate> _certRepo;
+        private readonly IGenericRepository<CertificateType> _certTypeRepo;
+        private readonly IMapper _mapper;
+        public CertificatesController(IGenericRepository<Certificate> certRepo,
+            IGenericRepository<CertificateType> certTypeRepo, IMapper mapper)
         {
-            _repo = repo;   
+            _mapper = mapper;
+            _certRepo = certRepo;
+            _certTypeRepo = certTypeRepo;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Certificate>>> GetCertificates()
+        public async Task<ActionResult<IReadOnlyList<CertificateToReturnDto>>> GetCertificates()
         {
 
-            var certs = await _repo.GetCertificatsAsync();
+            var spec = new CertificatesWithTypesSpecification();
 
-            return Ok(certs);
+            var certs = await _certRepo.ListAsync(spec);
+
+            return Ok(_mapper.Map<IReadOnlyList<Certificate>, IReadOnlyList<CertificateToReturnDto>>(certs));
 
         }
 
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Certificate>> GetCertificates(int id)
+        public async Task<ActionResult<CertificateToReturnDto>> GetCertificates(int id)
         {
-            return await _repo.GetCertificateByIdAsync(id);
+
+            var spec = new CertificatesWithTypesSpecification(id);
+
+            var cert = await _certRepo.GetEntityWithSpec(spec);
+
+            return _mapper.Map<Certificate, CertificateToReturnDto>(cert);
+
+        }
+
+        [HttpGet("certstype")]
+
+        public async Task<ActionResult<IReadOnlyList<CertificateType>>> GetCertificateType()
+        {
+
+            return Ok(await _certTypeRepo.ListAllAsync());
+
         }
 
 

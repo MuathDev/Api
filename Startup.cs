@@ -1,4 +1,5 @@
 
+using certs.Helpers;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
@@ -34,7 +35,8 @@ namespace Api
         {
 
             services.AddScoped<ICertificateRepository, CertificateRepository>();
-
+            services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
+            services.AddAutoMapper(typeof(MappingProfiles));
             services.AddControllers();
 
             services.AddDbContext<StoreContext>(x => x.UseSqlServer
@@ -42,7 +44,7 @@ namespace Api
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "e_comm", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "certs", Version = "v1" });
             });
         }
 
@@ -59,6 +61,8 @@ namespace Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseStaticFiles();
 
             app.UseAuthorization();
 
