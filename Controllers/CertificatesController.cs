@@ -6,15 +6,12 @@ using Core.Interfaces;
 using Core.Specifications;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
 
-    [ApiController]
-    [Route("api/[controller]")]
-    public class CertificatesController : ControllerBase
+    public class CertificatesController : BaseApiController
     {
 
         private readonly IGenericRepository<Certificate> _certRepo;
