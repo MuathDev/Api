@@ -1,4 +1,5 @@
 ﻿
+using Api.Helpers;
 using AutoMapper;
 using certs.Dtos;
 using Core.Entities;
@@ -26,14 +27,21 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<CertificateToReturnDto>>> GetCertificates()
+        public async Task<ActionResult<Pagination<CertificateToReturnDto>>> GetCertificates([FromQuery]CertificateSpecParams CertificateParams)
         {
 
-            var spec = new CertificatesWithTypesSpecification();
+            var spec = new CertificatesWithTypesSpecification(CertificateParams);
+
+            var countSpec = new CertificateWithFiltersForCountSpecification(CertificateParams);
+            var TotalItems = await _certRepo.CountAsync(countSpec);
 
             var certs = await _certRepo.ListAsync(spec);
 
-            return Ok(_mapper.Map<IReadOnlyList<Certificate>, IReadOnlyList<CertificateToReturnDto>>(certs));
+            var data = _mapper
+                .Map<IReadOnlyList<Certificate>, IReadOnlyList<CertificateToReturnDto>>(certs);
+
+            return Ok(new Pagination<CertificateToReturnDto>(CertificateParams.PageIndex,
+                CertificateParams.PageSize, TotalItems, data));
 
         }
 
